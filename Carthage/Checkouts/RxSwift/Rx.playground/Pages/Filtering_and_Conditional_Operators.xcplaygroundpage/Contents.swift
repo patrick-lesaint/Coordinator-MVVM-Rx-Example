@@ -1,8 +1,8 @@
 /*:
  > # IMPORTANT: To use **Rx.playground**:
  1. Open **Rx.xcworkspace**.
- 1. Build the **RxSwift-macOS** scheme (**Product** → **Build**).
- 1. Open **Rx** playground in the **Project navigator**.
+ 1. Build the **RxExample-macOS** scheme (**Product** → **Build**).
+ 1. Open **Rx** playground in the **Project navigator** (under RxExample project).
  1. Show the Debug Area (**View** → **Debug Area** → **Show Debug Area**).
  ----
  [Previous](@previous) - [Table of Contents](Table_of_Contents)
@@ -179,7 +179,7 @@ example("skip") {
  */
 example("skipWhile") {
     let disposeBag = DisposeBag()
-    
+
     Observable.of(1, 2, 3, 4, 5, 6)
         .skipWhile { $0 < 4 }
         .subscribe(onNext: { print($0) })
