@@ -12,8 +12,8 @@ class LanguageListViewModel {
 
     // MARK: - Inputs
 
-    let selectLanguage: AnyObserver<String>
-    let cancel: AnyObserver<Void>
+    let selectLanguage: PublishSubject<String>
+    let cancel: PublishSubject<Void>
 
     // MARK: - Outputs
 
@@ -24,12 +24,10 @@ class LanguageListViewModel {
     init(githubService: GithubService = GithubService()) {
         self.languages = githubService.getLanguageList()
 
-        let _selectLanguage = PublishSubject<String>()
-        self.selectLanguage = _selectLanguage.asObserver()
-        self.didSelectLanguage = _selectLanguage.asObservable()
+        self.selectLanguage = PublishSubject<String>()
+        self.didSelectLanguage = selectLanguage.asObservable()
 
-        let _cancel = PublishSubject<Void>()
-        self.cancel = _cancel.asObserver()
-        self.didCancel = _cancel.asObservable()
+        self.cancel = PublishSubject<Void>()
+        self.didCancel = cancel.asObservable()
     }
 }

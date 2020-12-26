@@ -14,16 +14,16 @@ class RepositoryListViewModel {
     // MARK: - Inputs
 
     /// Call to update current language. Causes reload of the repositories.
-    let setCurrentLanguage: AnyObserver<String>
+    let setCurrentLanguage: BehaviorSubject<String>
 
     /// Call to show language list screen.
-    let chooseLanguage: AnyObserver<Void>
+    let chooseLanguage: PublishSubject<Void>
 
     /// Call to open repository page.
-    let selectRepository: AnyObserver<RepositoryViewModel>
+    let selectRepository: PublishSubject<RepositoryViewModel>
 
     /// Call to reload repositories.
-    let reload: AnyObserver<Void>
+    let reload: PublishSubject<Void>
 
     // MARK: - Outputs
 
@@ -44,19 +44,18 @@ class RepositoryListViewModel {
 
     init(initialLanguage: String, githubService: GithubService = GithubService()) {
 
-        let _reload = PublishSubject<Void>()
-        self.reload = _reload.asObserver()
+        self.reload = PublishSubject<Void>()
 
-        let _currentLanguage = BehaviorSubject<String>(value: initialLanguage)
-        self.setCurrentLanguage = _currentLanguage.asObserver()
+        self.setCurrentLanguage = BehaviorSubject<String>(value: initialLanguage)
 
-        self.title = _currentLanguage.asObservable()
+        self.title = self.setCurrentLanguage.asObservable()
             .map { "\($0)" }
 
         let _alertMessage = PublishSubject<String>()
         self.alertMessage = _alertMessage.asObservable()
 
-        self.repositories = Observable.combineLatest( _reload, _currentLanguage) { _, language in language }
+        self.repositories = Observable.combineLatest( self.reload, self.setCurrentLanguage) { _, language in
+            return language }
             .flatMapLatest { language in
                 githubService.getMostPopularRepositories(byLanguage: language)
                     .catchError { error in
@@ -66,13 +65,11 @@ class RepositoryListViewModel {
             }
             .map { repositories in repositories.map(RepositoryViewModel.init) }
 
-        let _selectRepository = PublishSubject<RepositoryViewModel>()
-        self.selectRepository = _selectRepository.asObserver()
-        self.showRepository = _selectRepository.asObservable()
+        self.selectRepository = PublishSubject<RepositoryViewModel>()
+        self.showRepository = self.selectRepository.asObservable()
             .map { $0.url }
 
-        let _chooseLanguage = PublishSubject<Void>()
-        self.chooseLanguage = _chooseLanguage.asObserver()
-        self.showLanguageList = _chooseLanguage.asObservable()
+        self.chooseLanguage = PublishSubject<Void>()
+        self.showLanguageList = self.chooseLanguage.asObservable()
     }
 }
